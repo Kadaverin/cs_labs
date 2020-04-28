@@ -4,49 +4,49 @@ using System.Text;
 
 namespace StudentsList
 {
-    class DoubleLinkedListMergeSort <T> where T : IComparable, ICloneable
+    class DoubleLinkedListMergeSort <T> where T : IComparable
     {
-        public static Node<T> MergeSort(Node<T> node, Func<T, T, int> comparator)
+        public static Node<T> MergeSort(Node<T> node, Func<T, T, bool> predicate)
         {
-            if (node == null || node.Next == null)
+            if (node is null || node.Next is null)
             {
                 return node;
             }
             Node<T> second = SplitList(node);
 
             // Recur for left and right halves 
-            node = MergeSort(node, comparator);
-            second = MergeSort(second, comparator);
+            node = MergeSort(node, predicate);
+            second = MergeSort(second, predicate);
 
             // Merge the two sorted halves 
-            return MergeLists(node, second, comparator);
+            return MergeLists(node, second, predicate);
         }
 
-        private static Node<T> MergeLists(Node<T> first, Node<T> second, Func<T, T, int> comparator)
+        private static Node<T> MergeLists(Node<T> first, Node<T> second, Func<T, T, bool> predicate)
         {
             // If first linked list is empty 
-            if (first == null)
+            if (first is null)
             {
                 return second;
             }
 
             // If second linked list is empty 
-            if (second == null)
+            if (second is null)
             {
                 return first;
             }
 
             // Pick the smaller value 
-            if (first.Value.CompareTo(second.Value) == -1)
+            if (predicate(first.Value, second.Value))
             {
-                first.Next = MergeLists(first.Next, second, comparator);
+                first.Next = MergeLists(first.Next, second, predicate);
                 first.Next.Prev = first;
                 first.Prev = null;
                 return first;
-            } 
+            }
             else
             {
-                second.Next = MergeLists(first, second.Next, comparator);
+                second.Next = MergeLists(first, second.Next, predicate);
                 second.Next.Prev = second;
                 second.Prev = null;
                 return second;
@@ -57,7 +57,7 @@ namespace StudentsList
         private static Node<T> SplitList(Node<T> head)
         {
             Node<T> fast = head, slow = head;
-            while (fast.Next != null && fast.Next.Next != null)
+            while (fast.Next is object && fast.Next.Next is object)
             {
                 fast = fast.Next.Next;
                 slow = slow.Next;

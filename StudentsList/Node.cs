@@ -4,7 +4,7 @@ using System.Text;
 
 namespace StudentsList
 {
-    public class Node<T> : IComparable<Node<T>>, ICloneable where T : IComparable, ICloneable
+    public class Node<T> : IComparable<Node<T>>, ICloneable where T : IComparable
     {
         public T Value { get; set; }
         public Node<T> Prev { get; set; }
@@ -53,7 +53,7 @@ namespace StudentsList
 
         public object Clone()
         {
-            return typeof(T).IsValueType ? Value : Value.Clone();
+            return Value is ICloneable ? ((ICloneable)Value).Clone() : Value;
         }
 
         public override int GetHashCode()
