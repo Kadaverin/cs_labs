@@ -4,7 +4,7 @@ using System.Text;
 
 namespace StudentsList
 {
-    public class Node<T> : IComparable<Node<T>>, ICloneable where T : IComparable
+    public class Node<T> : IComparable<Node<T>>, ICloneable where T : IComparable<T>
     {
         public T Value { get; set; }
         public Node<T> Prev { get; set; }

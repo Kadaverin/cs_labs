@@ -5,23 +5,37 @@ using System.Collections;
 
 namespace StudentsList
 {
-    public class DoubleLinkedList<T> : ICloneable, IEnumerable, IComparable<DoubleLinkedList<T>> where T : IComparable
+    public class DoubleLinkedList<T> : ICloneable, IEnumerable<T>, IComparable<DoubleLinkedList<T>> where T : IComparable<T>
     {
         public DoubleLinkedList() { }
         protected Node<T> Head { get; set; }
         protected Node<T> CurrentNode { get; set; }
         public int Length { get; private set; } = 0;
 
-        public DoubleLinkedList(DoubleLinkedList<T> source)
+        public static DoubleLinkedList<T> Of(IEnumerable<T> source)
         {
-            if (source is null) throw new ArgumentException("Can not clone list from 'null'");
+            if (source is null) throw new ArgumentNullException("Can not clone list from 'null'");
+
+            var list = new DoubleLinkedList<T>();
 
             foreach (T element in source)
             {
                 var elem = element is ICloneable ? ((ICloneable)element).Clone() : element;
 
-                Push((T)elem);
+                list.Push((T)elem);
             }
+
+            return list;
+        }
+
+        public static DoubleLinkedList<T> Of(params T[] source)
+        {
+            return Of(source);
+        }
+
+        public object Clone()
+        {
+            return Of(this);
         }
 
         public void Push(T value)
@@ -36,9 +50,9 @@ namespace StudentsList
             Head = Head.Prev;
         }
 
-        public void Push(T data, int index)
+        public void PutAt(T data, int index)
         {
-            var nodeToAddAfter = GetNode(index);
+            var nodeToAddAfter = GetNode(index - 1);
 
             AddAfter(data, nodeToAddAfter);
         }
@@ -50,9 +64,14 @@ namespace StudentsList
 
         private Node<T> GetNode(int index)
         {
-            if (index > Length)
+            if (index < 0)
             {
-                throw new ArgumentException("Argument 'index' can not be greater than length of list");
+                throw new IndexOutOfRangeException("Argument 'index' can not be negative");
+            }
+
+            if (index >= Length)
+            {
+                throw new IndexOutOfRangeException("Argument 'index' can not be greater or equal to length of list");
             }
 
             Node<T> node = Head; ;
@@ -144,7 +163,7 @@ namespace StudentsList
             return isDeleted;
         }
 
-        void DeleteNode(Node<T> target)
+        private void DeleteNode(Node<T> target)
         {
             if (Length == 1) Head = null;
             else
@@ -166,17 +185,19 @@ namespace StudentsList
             Length = 0;
         }
 
-        public void Sort(Func<T, T, bool> predicate)
+        public void Sort(Func<T, T, bool> isSmaller)
         {
-            DoubleLinkedListMergeSort<T>.MergeSort(Head, predicate);
+            var temp = Head;
+            temp.Prev.Next = null;
+            Head = DoubleLinkedListMergeSort<T>.MergeSort(ref temp, isSmaller);
         }
 
         public void Sort(bool isAsc)
         {
-           var predicate = isAsc ? (Func<T, T, bool>)((el1, el2) => el1.CompareTo(el2) == -1)
+           var isSmaller = isAsc ? (Func<T, T, bool>)((el1, el2) => el1.CompareTo(el2) == -1)
                 : ((el1, el2) => el1.CompareTo(el2) == 1);
 
-            Sort(predicate);
+            Sort(isSmaller);
         }
 
 
@@ -217,11 +238,6 @@ namespace StudentsList
             newNode.Prev = target;
 
             Length++;
-        }
-
-        public object Clone()
-        {
-            return new DoubleLinkedList<T>(this);
         }
 
         public static int Compare(DoubleLinkedList<T> first, DoubleLinkedList<T> second)
@@ -325,7 +341,7 @@ namespace StudentsList
             CurrentNode = Head.Prev;
         }
 
-        public bool SortCurrent(Func<T, T, bool> predicate)
+        public bool SortCurrent(Func<T, T, bool> isSmaller)
         {
             if (Length > 1 && !(CurrentNode is null))
             {
@@ -333,7 +349,7 @@ namespace StudentsList
 
                 for (int i = 0; i < Length; i++)
                 {
-                    if (predicate(tempNode.Value, CurrentNode.Value))
+                    if (isSmaller(tempNode.Value, CurrentNode.Value))
                     {
                         Swap(tempNode, CurrentNode);
 

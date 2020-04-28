@@ -4,9 +4,9 @@ using System.Text;
 
 namespace StudentsList
 {
-    class DoubleLinkedListMergeSort <T> where T : IComparable
+    class DoubleLinkedListMergeSort <T> where T : IComparable<T>
     {
-        public static Node<T> MergeSort(Node<T> node, Func<T, T, bool> predicate)
+        public static Node<T> MergeSort(ref Node<T> node, Func<T, T, bool> isSmaller)
         {
             if (node is null || node.Next is null)
             {
@@ -15,14 +15,14 @@ namespace StudentsList
             Node<T> second = SplitList(node);
 
             // Recur for left and right halves 
-            node = MergeSort(node, predicate);
-            second = MergeSort(second, predicate);
+            node = MergeSort(ref node, isSmaller);
+            second = MergeSort(ref second, isSmaller);
 
             // Merge the two sorted halves 
-            return MergeLists(node, second, predicate);
+            return MergeLists(node, second, isSmaller);
         }
 
-        private static Node<T> MergeLists(Node<T> first, Node<T> second, Func<T, T, bool> predicate)
+        private static Node<T> MergeLists(Node<T> first, Node<T> second, Func<T, T, bool> isSmaller)
         {
             // If first linked list is empty 
             if (first is null)
@@ -37,16 +37,16 @@ namespace StudentsList
             }
 
             // Pick the smaller value 
-            if (predicate(first.Value, second.Value))
+            if (isSmaller(first.Value, second.Value))
             {
-                first.Next = MergeLists(first.Next, second, predicate);
+                first.Next = MergeLists(first.Next, second, isSmaller);
                 first.Next.Prev = first;
                 first.Prev = null;
                 return first;
             }
             else
             {
-                second.Next = MergeLists(first, second.Next, predicate);
+                second.Next = MergeLists(first, second.Next, isSmaller);
                 second.Next.Prev = second;
                 second.Prev = null;
                 return second;
