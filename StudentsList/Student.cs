@@ -57,7 +57,7 @@ namespace StudentsList
              return Surname.GetHashCode()
                 ^ Patronimic.GetHashCode() * 17
                 ^ Name.GetHashCode() * 19
-                * AverageGrade.GetHashCode();
+                * BirthYear.GetHashCode();
         }
 
         public static int CompareTo(Student student1, Student student2)
@@ -73,14 +73,6 @@ namespace StudentsList
             }
 
             int result = string.CompareOrdinal(Surname, student2.Surname);
-
-            if (result != 0)
-            {
-                return result;
-            }
-
-            result = string.CompareOrdinal(Patronimic, student2.Patronimic);
-
             if (result != 0)
             {
                 return result;
@@ -92,13 +84,13 @@ namespace StudentsList
                 return result;
             }
 
-            result = BirthYear.CompareTo(student2.BirthYear);
+            result = string.CompareOrdinal(Patronimic, student2.Patronimic);
             if (result != 0)
             {
                 return result;
             }
 
-            return AverageGrade.CompareTo(student2.AverageGrade);
+            return BirthYear.CompareTo(student2.BirthYear);
         }
 
 
