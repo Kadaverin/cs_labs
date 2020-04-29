@@ -1,0 +1,74 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace StudentsList
+{
+    public class NamedDoubleLinkedList<T> : DoubleLinkedList<T>,IComparable<NamedDoubleLinkedList<T>>
+    where T : IComparable<T>
+    {
+        public string Name { get; set; }
+        public NamedDoubleLinkedList(string name)
+        {
+            Name = name;
+        }
+
+        public NamedDoubleLinkedList<T> FromList(NamedDoubleLinkedList<T> source)
+        {
+            var list = (NamedDoubleLinkedList<T>)base.Clone();
+
+            list.Name = source.Name;
+
+            return list;
+        }
+
+        public override object Clone()
+        {
+            return FromList(this);
+        }
+
+
+
+        public int CompareTo(NamedDoubleLinkedList<T> other)
+        {
+            if (ReferenceEquals(this, other)) return 0;
+            if (ReferenceEquals(null, other)) return 1;
+            return string.CompareOrdinal(Name, other.Name);
+        }
+
+        public static int Compare(NamedDoubleLinkedList<T> list1, NamedDoubleLinkedList<T> list2)
+        {
+            return string.CompareOrdinal(list1?.Name, list2?.Name);
+        }
+
+        public static bool operator == (NamedDoubleLinkedList<T> list1, NamedDoubleLinkedList<T> list2)
+        {
+            return Compare(list1, list2) == 0;
+        }
+
+        public static bool operator !=(NamedDoubleLinkedList<T> list1, NamedDoubleLinkedList<T> list2)
+        {
+            return Compare(list1, list2) != 0;
+        }
+
+        public static bool operator >(NamedDoubleLinkedList<T> list1, NamedDoubleLinkedList<T> list2)
+        {
+            return Compare(list1, list2) < 0;
+        }
+
+        public static bool operator <(NamedDoubleLinkedList<T> list1, NamedDoubleLinkedList<T> list2)
+        {
+            return Compare(list1, list2) > 0;
+        }
+
+        public static bool operator >=(NamedDoubleLinkedList<T> list1, NamedDoubleLinkedList<T> list2)
+        {
+            return Compare(list1, list2) <= 0;
+        }
+
+        public static bool operator <=(NamedDoubleLinkedList<T> list1, NamedDoubleLinkedList<T> list2)
+        {
+            return Compare(list1, list2) >= 0;
+        }
+    }
+}
