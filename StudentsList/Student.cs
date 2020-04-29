@@ -49,7 +49,7 @@ namespace StudentsList
         
         public object Clone()
         {
-            return new Student(Surname, Patronimic, Name, BirthYear, AverageGrade);
+            return new Student(Surname, Name, Patronimic, BirthYear, AverageGrade);
         }
 
         public override int GetHashCode()
