@@ -10,6 +10,20 @@ namespace Tests
     public class DoubleLinkedListTests
     {
 
+        [TestMethod]
+        public void SortShouldWorkWithLargeAmountOfElements()
+        {
+            var list = new DoubleLinkedList<int>();
+
+            // create not sorted random elements
+            for (int i = 0; i < 50000; i++)
+            {
+                list.Push(i);
+                list.Unshift(i - 3);
+            }
+
+            list.Sort();
+        }
 
         [TestMethod]
         public void SortShouldWorkAscendingByDefault()
@@ -351,22 +365,6 @@ namespace Tests
             Assert.AreEqual(2, list.Get(1));
             Assert.AreEqual(4, list.Get(2));
         }
-
-
-       /* [TestMethod]
-        public void SortShouldWorkWithLargeAmountOfElements()
-        {
-            var list = new DoubleLinkedList<int>();
-
-            // create not sorted random elements
-            for(int i = 0; i < 50000; i++)
-            {
-                list.Push(i);
-                list.Unshift(i - 3);
-            }
-
-            list.Sort();
-        } */
 
     }
 }

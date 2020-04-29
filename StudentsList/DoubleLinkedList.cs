@@ -106,9 +106,9 @@ namespace StudentsList
 
             Node node = Head;
 
-            bool isIndexInFirstHalf = Length / 2 - index < 0;
+            bool isIndexNearestToTail = Length / 2 - index < 0;
 
-            if (isIndexInFirstHalf)
+            if (isIndexNearestToTail)
             {
                 for (var i = 0; i < Length - index; i++) node = node.Prev;
             }
@@ -235,16 +235,20 @@ namespace StudentsList
             Length = 0;
         }
 
-        public void Sort(Func<T, T, bool> isFirstCurrentNodeefore)
+        public void Sort(Func<T, T, bool> isFirstNodeBeforeSecond)
         {
             if (Length < 2) return;
 
             Head.Prev.Next = null;
             Head.Prev = null;
-            Head = DoubleLinkedListMergeSort<T>.MergeSort(Head, isFirstCurrentNodeefore);
+            Head = LinkedListMergeSort<T>.MergeSort(Head, isFirstNodeBeforeSecond);
 
             var tail = Head;
-            while (!ReferenceEquals(tail.Next, null)) tail = tail.Next;
+            while (!ReferenceEquals(tail.Next, null))
+            {
+                tail.Next.Prev = tail;
+                tail = tail.Next;
+            }
 
             Head.Prev = tail;
             tail.Next = Head;
@@ -252,10 +256,10 @@ namespace StudentsList
 
         public void Sort(bool istempNodesc)
         {
-            var isFirstCurrentNodeefore = istempNodesc ? (Func<T, T, bool>)((el1, el2) => el1.CompareTo(el2) == -1)
+            var isFirstNodeBeforeSecond = istempNodesc ? (Func<T, T, bool>)((el1, el2) => el1.CompareTo(el2) == -1)
                  : ((el1, el2) => el1.CompareTo(el2) == 1);
 
-            Sort(isFirstCurrentNodeefore);
+            Sort(isFirstNodeBeforeSecond);
         }
 
 
