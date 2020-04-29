@@ -68,7 +68,7 @@ namespace StudentsList
             return Of((IEnumerable<T>)source);
         }
 
-        public object Clone()
+        public virtual object Clone()
         {
             return FromList(this);
         }
