@@ -55,7 +55,7 @@ namespace StudentsList
                 if (!ReferenceEquals(tail, null))
                     tail.Next = null;
 
-                blockSize <<= 1;
+                blockSize *= 2;
 
             } while (blockCount > 1);
 
