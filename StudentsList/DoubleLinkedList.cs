@@ -2,25 +2,29 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Collections;
+using System.Drawing;
+using System.Globalization;
 
 namespace StudentsList
 {
     public class DoubleLinkedList<T> : ICloneable, IEnumerable<T>, IComparable<DoubleLinkedList<T>> where T : IComparable<T>
     {
         public DoubleLinkedList() { }
-        protected Node<T> Head { get; set; }
-        protected Node<T> CurrentNode { get; set; }
+        protected Node Head { get; set; }
+        protected Node CurrentNode { get; set; }
         public int Length { get; private set; } = 0;
 
         public static DoubleLinkedList<T> Of(IEnumerable<T> source)
         {
-            if (source is null) throw new ArgumentNullException("Can not clone list from 'null'");
+            if (ReferenceEquals(source, null)) throw new ArgumentNullException("Can not clone list from 'null'");
 
             var list = new DoubleLinkedList<T>();
 
+            if (source is DoubleLinkedList<T>) return FromList((DoubleLinkedList<T>)source);
+
             foreach (T element in source)
             {
-                var elem = element is ICloneable ? ((ICloneable)element).Clone() : element;
+                var elem = Utils.Clone(element);
 
                 list.Push((T)elem);
             }
@@ -28,14 +32,45 @@ namespace StudentsList
             return list;
         }
 
+        private static DoubleLinkedList<T> FromList(DoubleLinkedList<T> source)
+        {
+            if (ReferenceEquals(source, null)) throw new ArgumentNullException("Can not clone list from 'null'");
+
+            var list = new DoubleLinkedList<T>();
+            var node = source.Head;
+            int? currPos = null;
+
+            for (int i = 0; i < source.Length; i++)
+            {
+                var val = Utils.Clone(node.Value);
+                list.Push((T)val);
+
+                if (ReferenceEquals(node, source.CurrentNode) && !ReferenceEquals(source.CurrentNode, null))
+                {
+                    currPos = i;
+                }
+
+                node = node.Next;
+            }
+
+            if (!ReferenceEquals(currPos, null))
+            {
+                list.MoveCurrentToHead();
+
+                for (int i = 0; i < currPos; i++) list++;
+            }
+
+            return list;
+        }
+
         public static DoubleLinkedList<T> Of(params T[] source)
         {
-            return Of(source);
+            return Of((IEnumerable<T>)source);
         }
 
         public object Clone()
         {
-            return Of(this);
+            return FromList(this);
         }
 
         public void Push(T value)
@@ -50,37 +85,50 @@ namespace StudentsList
             Head = Head.Prev;
         }
 
-        public void PutAt(T data, int index)
+        public void PutAt(T data, uint index)
         {
-            var nodeToAddAfter = GetNode(index - 1);
+            var nodeTotempNodeddtempNodefter = GetNode(index - 1);
 
-            AddAfter(data, nodeToAddAfter);
+            AddAfter(data, nodeTotempNodeddtempNodefter);
         }
 
-        public T Get(int index)
+        public T Get(uint index)
         {
             return GetNode(index).Value;
         }
 
-        private Node<T> GetNode(int index)
+        private Node GetNode(uint index)
         {
-            if (index < 0)
-            {
-                throw new IndexOutOfRangeException("Argument 'index' can not be negative");
-            }
-
             if (index >= Length)
             {
-                throw new IndexOutOfRangeException("Argument 'index' can not be greater or equal to length of list");
+                throw new IndexOutOfRangeException("Argument 'index' can not be greater than length of list");
             }
 
-            Node<T> node = Head; ;
+            Node node = Head;
 
-            for (var i = 0; i < index; i++) node = node.Next;
+            bool isIndexNearestToTail = Length / 2 - index < 0;
+
+            if (isIndexNearestToTail)
+            {
+                for (var i = 0; i < Length - index; i++) node = node.Prev;
+            }
+            else
+            {
+                for (var i = 0; i < index; i++) node = node.Next;
+            }
 
             return node;
         }
 
+        public T Current()
+        {
+            if (ReferenceEquals(CurrentNode, null))
+            {
+                throw new InvalidOperationException("Can not get Current before setting it up");
+            }
+
+            return CurrentNode.Value;
+        }
         public bool Includes(T data)
         {
             return Includes(elem => elem.CompareTo(data) == 0);
@@ -88,26 +136,26 @@ namespace StudentsList
 
         public bool Includes(Func<T, bool> predicate)
         {
-            Node<T> node = FindNode(predicate);
+            Node node = FindNode(predicate);
 
-            return !(node is null);
+            return !(ReferenceEquals(node, null));
         }
 
         public T Find(Func<T, bool> predicate)
         {
-            Node<T> node = FindNode(predicate);
+            Node node = FindNode(predicate);
 
-            return node is null ? default : node.Value;
+            return ReferenceEquals(node, null) ? default : node.Value;
         }
 
-        private Node<T> FindNode(T data)
+        private Node FindNode(T data)
         {
             return FindNode(elem => elem.CompareTo(data) == 0);
         }
 
-        private Node<T> FindNode(Func<T, bool> predicate)
+        private Node FindNode(Func<T, bool> predicate)
         {
-            Node<T> temp = Head;
+            Node temp = Head;
 
             for (int i = 0; i < Length; i++)
             {
@@ -140,13 +188,13 @@ namespace StudentsList
 
         public bool Remove(Func<T, bool> predicate, bool allEntries = false)
         {
-            if (Head is null)
+            if (ReferenceEquals(Head, null))
             {
                 return false;
             }
 
             bool isDeleted = false;
-            Node<T> temp = Head.Prev;
+            Node temp = Head.Prev;
 
             do
             {
@@ -163,20 +211,22 @@ namespace StudentsList
             return isDeleted;
         }
 
-        private void DeleteNode(Node<T> target)
+        private void DeleteNode(Node target)
         {
-            if (Length == 1) Head = null;
-            else
+            Length--;
+            if (Length == 0)
             {
-                target.Prev.Next = target.Next;
-                target.Next.Prev = target.Prev;
+                Head = null;
+                return;
             }
-            if (ReferenceEquals(target, Head) && Length > 1)
+
+            target.Prev.Next = target.Next;
+            target.Next.Prev = target.Prev;
+
+            if (ReferenceEquals(target, Head))
             {
                 Head = target.Next;
             }
-
-            Length--;
         }
 
         public void Clear()
@@ -185,19 +235,31 @@ namespace StudentsList
             Length = 0;
         }
 
-        public void Sort(Func<T, T, bool> isSmaller)
+        public void Sort(Func<T, T, bool> isFirstNodeBeforeSecond)
         {
-            var temp = Head;
-            temp.Prev.Next = null;
-            Head = DoubleLinkedListMergeSort<T>.MergeSort(ref temp, isSmaller);
+            if (Length < 2) return;
+
+            Head.Prev.Next = null;
+            Head.Prev = null;
+            Head = LinkedListMergeSort<T>.MergeSort(Head, isFirstNodeBeforeSecond);
+
+            var tail = Head;
+            while (!ReferenceEquals(tail.Next, null))
+            {
+                tail.Next.Prev = tail;
+                tail = tail.Next;
+            }
+
+            Head.Prev = tail;
+            tail.Next = Head;
         }
 
-        public void Sort(bool isAsc)
+        public void Sort(bool istempNodesc)
         {
-           var isSmaller = isAsc ? (Func<T, T, bool>)((el1, el2) => el1.CompareTo(el2) == -1)
-                : ((el1, el2) => el1.CompareTo(el2) == 1);
+            var isFirstNodeBeforeSecond = istempNodesc ? (Func<T, T, bool>)((el1, el2) => el1.CompareTo(el2) == -1)
+                 : ((el1, el2) => el1.CompareTo(el2) == 1);
 
-            Sort(isSmaller);
+            Sort(isFirstNodeBeforeSecond);
         }
 
 
@@ -208,30 +270,30 @@ namespace StudentsList
 
         private void AddFirst(T data)
         {
-            Head = new Node<T>
-            {
-                Value = data
-            };
+            Head = new Node(data);
+
             Head.Next = Head;
             Head.Prev = Head;
 
             Length++;
         }
 
-        private void AddAfter(T data, Node<T> target)
+        private void AddAfter(T data, Node target)
         {
-            if (Head is null)
+            if(ReferenceEquals(data, null))
+            {
+                throw new ArgumentNullException("Can not add null value to list");
+            }
+
+            if (ReferenceEquals(Head, null))
             {
                 AddFirst(data);
                 return;
             }
 
-            Node<T> newNode = new Node<T>
-            {
-                Value = data,
+            Node newNode = new Node(data);
 
-                Next = target.Next
-            };
+            newNode.Next = target.Next;
             target.Next.Prev = newNode;
 
             target.Next = newNode;
@@ -242,8 +304,8 @@ namespace StudentsList
 
         public static int Compare(DoubleLinkedList<T> first, DoubleLinkedList<T> second)
         {
-            bool isFirstNull = first is null;
-            bool isSecondNull = second is null;
+            bool isFirstNull = ReferenceEquals(first, null);
+            bool isSecondNull = ReferenceEquals(second, null);
 
             if (isFirstNull && isSecondNull) return 0;
 
@@ -251,7 +313,7 @@ namespace StudentsList
 
             if (isSecondNull) return 1;
 
-            return first.Length > second.Length ? 1 : first.Length == second.Length ? 0 : -1;
+            return first?.Length > second?.Length ? 1 : first?.Length == second?.Length ? 0 : -1;
         }
 
         public int CompareTo(DoubleLinkedList<T> obj)
@@ -278,7 +340,7 @@ namespace StudentsList
 
         public static bool operator !=(DoubleLinkedList<T> left, DoubleLinkedList<T> right)
         {
-            return !(left == right);
+            return Compare(left, right) != 0;
         }
 
         public static bool operator <(DoubleLinkedList<T> left, DoubleLinkedList<T> right)
@@ -288,7 +350,7 @@ namespace StudentsList
 
         public static bool operator <=(DoubleLinkedList<T> left, DoubleLinkedList<T> right)
         {
-            return left < right || left == right;
+            return Compare(left, right) <= 0;
         }
 
         public static bool operator >(DoubleLinkedList<T> left, DoubleLinkedList<T> right)
@@ -298,14 +360,16 @@ namespace StudentsList
 
         public static bool operator >=(DoubleLinkedList<T> left, DoubleLinkedList<T> right)
         {
-            return left > right || left == right;
+            return Compare(left, right) >= 0;
         }
 
-        public static bool operator !(DoubleLinkedList<T> list) => list.Length == 0;
+        public static bool operator !(DoubleLinkedList<T> list) {
+            return ReferenceEquals(list, null) || list.Length == 0;
+        }
 
         public static DoubleLinkedList<T> operator ++(DoubleLinkedList<T> list)
         {
-            if (list.CurrentNode is object)
+            if (!ReferenceEquals(list?.CurrentNode, null))
             {
                 list.CurrentNode = list.CurrentNode.Next;
             }
@@ -315,7 +379,7 @@ namespace StudentsList
 
         public static DoubleLinkedList<T> operator --(DoubleLinkedList<T> list)
         {
-            if (list.CurrentNode is object)
+            if (!ReferenceEquals(list?.CurrentNode, null))
             {
                 list.CurrentNode = list.CurrentNode.Prev;
             }
@@ -328,7 +392,7 @@ namespace StudentsList
         #region CurrentNode hanlers
         public void DeleteCurrent()
         {
-            if (CurrentNode is object) DeleteNode(CurrentNode);
+            if (!ReferenceEquals(CurrentNode, null)) DeleteNode(CurrentNode);
         }
 
         public void MoveCurrentToHead()
@@ -343,7 +407,7 @@ namespace StudentsList
 
         public bool SortCurrent(Func<T, T, bool> isSmaller)
         {
-            if (Length > 1 && !(CurrentNode is null))
+            if (Length > 1 && !(ReferenceEquals(CurrentNode, null)))
             {
                 var tempNode = Head;
 
@@ -363,12 +427,17 @@ namespace StudentsList
 
         public bool SortCurrent()
         {
-            return SortCurrent((val, curVal) => val.CompareTo(curVal) == 1);
+            return SortCurrent((val, curVal) => val.CompareTo(curVal) == -1);
         }
 
         #endregion
 
-        private void Swap(Node<T> A, Node<T> B)
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Head, CurrentNode, Length);
+        }
+
+        private static void Swap(Node A, Node B)
         {
             var p = A;
             A = B;
@@ -381,9 +450,17 @@ namespace StudentsList
             A.Prev = p.Prev;
         }
 
-        public override int GetHashCode()
+
+        public class Node
         {
-            return HashCode.Combine(Head, CurrentNode, Length);
+            public T Value { get; set; }
+            public Node Prev { get; set; }
+            public Node Next { get; set; }
+
+            public Node(T data)
+            {
+                Value = data;
+            }
         }
     }
 }

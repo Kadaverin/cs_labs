@@ -1,6 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StudentsList;
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace Tests
@@ -8,6 +9,22 @@ namespace Tests
     [TestClass]
     public class DoubleLinkedListTests
     {
+
+        [TestMethod]
+        public void SortShouldWorkWithLargeAmountOfElements()
+        {
+            var list = new DoubleLinkedList<int>();
+
+            // create not sorted random elements
+            for (int i = 0; i < 50000; i++)
+            {
+                list.Push(i);
+                list.Unshift(i - 3);
+            }
+
+            list.Sort();
+        }
+
         [TestMethod]
         public void SortShouldWorkAscendingByDefault()
         {
@@ -21,6 +38,7 @@ namespace Tests
             Assert.AreEqual(4, list.Get(3));
         }
 
+       
         [TestMethod]
         public void SortShouldSortDescWhenPassIsAscAsFalse()
         {
@@ -35,7 +53,7 @@ namespace Tests
         }
 
         [TestMethod]
-        public void SortShouldWorkWithIsSmallerPredicate()
+        public void SortShouldWorkWithisFirstBeforePredicate()
         {
             var list = DoubleLinkedList<int>.Of(new[] { 3, 1, 2, 4 });
 
@@ -43,9 +61,21 @@ namespace Tests
             list.Sort((el1, el2) => Math.Abs(el2 - el1) >= 2);
 
             Assert.AreEqual(2, list.Get(0));
-            Assert.AreEqual(1, list.Get(1));
+            Assert.AreEqual(4, list.Get(1));
             Assert.AreEqual(3, list.Get(2));
-            Assert.AreEqual(4, list.Get(3));
+            Assert.AreEqual(1, list.Get(3));
+        }
+
+
+
+        [TestMethod]
+        public void GetShouldReturnDataByIndex()
+        {
+            var list = DoubleLinkedList<int>.Of(1, 2, 3);
+
+            Assert.AreEqual(1, list.Get(0));
+            Assert.AreEqual(2, list.Get(1));
+            Assert.AreEqual(3, list.Get(2));
         }
 
         [TestMethod]
@@ -137,12 +167,26 @@ namespace Tests
             Assert.AreEqual(FIRST_STUDENT_GRADE, cloned.Get(0).AverageGrade);
         }
 
+        public void CloneAndOfhouldCloneSourceListCurrentNode()
+        {
+            var list = DoubleLinkedList<int>.Of(1, 2, 3);
+
+            list.MoveCurrentToHead(); // current node refers to 1
+            list++; // current node refers to 2
+
+            DoubleLinkedList<int> cloned1 = (DoubleLinkedList<int>)list.Clone();
+            DoubleLinkedList<int> cloned2 = DoubleLinkedList<int>.Of(list);
+
+            Assert.AreEqual(2, cloned1.Current());
+            Assert.AreEqual(2, cloned2.Current());
+        }
+
         [TestMethod]
         public void PutAtShoulInsertDataByIndex()
         {
             var list = DoubleLinkedList<int>.Of(1, 3, 4);
 
-            int INDEX = 1;
+            uint INDEX = 1;
             int NEW_DATA = 2;
 
             list.PutAt(NEW_DATA, INDEX);
@@ -304,10 +348,10 @@ namespace Tests
         {
             var list = new DoubleLinkedList<int>();
 
-            Assert.ThrowsException<IndexOutOfRangeException>(() => { list.Get(-1); });
             Assert.ThrowsException<IndexOutOfRangeException>(() => { list.Get(0); });
-            Assert.ThrowsException<IndexOutOfRangeException>(() => { list.Get(-1); });
+            Assert.ThrowsException<IndexOutOfRangeException>(() => { list.Get(10000); });
         }
+
 
         [TestMethod]
         public void ShouldSortCurrent()
