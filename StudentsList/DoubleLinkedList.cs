@@ -26,7 +26,7 @@ namespace StudentsList
             {
                 var elem = Utils.Clone(element);
 
-                list.Push((T)elem);
+                if(!ReferenceEquals(elem, null)) list.Push((T)elem);
             }
 
             return list;
@@ -304,13 +304,14 @@ namespace StudentsList
 
         public static int Compare(DoubleLinkedList<T> first, DoubleLinkedList<T> second)
         {
-            if (first?.Length > second?.Length) return 1;
+            if (ReferenceEquals(first, second)) return 0;
 
-            if (first?.Length < second?.Length) return -1;
+            if (ReferenceEquals(first, null)) return -1;
 
-            if (first?.Length == second?.Length) return 0;
+            if (ReferenceEquals(second, null)) return 1;
 
-            return ReferenceEquals(first, null) ? -1 : 1;
+            return first.Length > second.Length ? 1
+                : first.Length < second.Length ? -1 : 0;
         }
 
         public int CompareTo(DoubleLinkedList<T> obj)
