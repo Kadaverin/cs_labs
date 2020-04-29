@@ -304,16 +304,13 @@ namespace StudentsList
 
         public static int Compare(DoubleLinkedList<T> first, DoubleLinkedList<T> second)
         {
-            bool isFirstNull = ReferenceEquals(first, null);
-            bool isSecondNull = ReferenceEquals(second, null);
+            if (first?.Length > second?.Length) return 1;
 
-            if (isFirstNull && isSecondNull) return 0;
+            if (first?.Length < second?.Length) return -1;
 
-            if (isFirstNull) return -1;
+            if (first?.Length == second?.Length) return 0;
 
-            if (isSecondNull) return 1;
-
-            return first?.Length > second?.Length ? 1 : first?.Length == second?.Length ? 0 : -1;
+            return ReferenceEquals(first, null) ? -1 : 1;
         }
 
         public int CompareTo(DoubleLinkedList<T> obj)
@@ -405,21 +402,26 @@ namespace StudentsList
             CurrentNode = Head.Prev;
         }
 
-        public bool SortCurrent(Func<T, T, bool> isSmaller)
+        // Assuming that all elements already sorted except current by tech task
+        public bool SortCurrent(Func<T, T, bool> isFirtBeforeSecond)
         {
             if (Length > 1 && !(ReferenceEquals(CurrentNode, null)))
             {
                 var tempNode = Head;
 
+                bool isAsc = isFirtBeforeSecond(CurrentNode.Value, CurrentNode.Next.Value);
+
+                if (!isAsc) tempNode = tempNode.Prev;
+
                 for (int i = 0; i < Length; i++)
                 {
-                    if (isSmaller(tempNode.Value, CurrentNode.Value))
+                    if (isFirtBeforeSecond(tempNode.Value, CurrentNode.Value))
                     {
                         Swap(tempNode, CurrentNode);
 
                         return true;
                     }
-                    tempNode = tempNode.Next;
+                    tempNode = isAsc ? tempNode.Next : tempNode.Prev;
                 }
             }
             return false;
