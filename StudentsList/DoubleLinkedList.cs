@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Collections;
 using System.Drawing;
+using System.Globalization;
 
 namespace StudentsList
 {
@@ -109,7 +110,7 @@ namespace StudentsList
 
             if (isIndexInFirstHalf)
             {
-                for (var i = 0; i < index; i++) node = node.Prev;
+                for (var i = 0; i < Length - index; i++) node = node.Prev;
             }
             else
             {
@@ -238,9 +239,15 @@ namespace StudentsList
         {
             if (Length < 2) return;
 
-            var temp = Head;
-            temp.Prev.Next = null;
-            Head = DoubleLinkedListMergeSort<T>.MergeSort(ref temp, isFirstCurrentNodeefore);
+            Head.Prev.Next = null;
+            Head.Prev = null;
+            Head = DoubleLinkedListMergeSort<T>.MergeSort(Head, isFirstCurrentNodeefore);
+
+            var tail = Head;
+            while (!ReferenceEquals(tail.Next, null)) tail = tail.Next;
+
+            Head.Prev = tail;
+            tail.Next = Head;
         }
 
         public void Sort(bool istempNodesc)

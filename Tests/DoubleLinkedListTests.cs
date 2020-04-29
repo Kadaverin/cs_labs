@@ -1,6 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StudentsList;
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace Tests
@@ -8,6 +9,7 @@ namespace Tests
     [TestClass]
     public class DoubleLinkedListTests
     {
+
 
         [TestMethod]
         public void SortShouldWorkAscendingByDefault()
@@ -48,6 +50,18 @@ namespace Tests
             Assert.AreEqual(4, list.Get(1));
             Assert.AreEqual(3, list.Get(2));
             Assert.AreEqual(1, list.Get(3));
+        }
+
+
+
+        [TestMethod]
+        public void GetShouldReturnDataByIndex()
+        {
+            var list = DoubleLinkedList<int>.Of(1, 2, 3);
+
+            Assert.AreEqual(1, list.Get(0));
+            Assert.AreEqual(2, list.Get(1));
+            Assert.AreEqual(3, list.Get(2));
         }
 
         [TestMethod]
@@ -337,6 +351,22 @@ namespace Tests
             Assert.AreEqual(2, list.Get(1));
             Assert.AreEqual(4, list.Get(2));
         }
+
+
+       /* [TestMethod]
+        public void SortShouldWorkWithLargeAmountOfElements()
+        {
+            var list = new DoubleLinkedList<int>();
+
+            // create not sorted random elements
+            for(int i = 0; i < 50000; i++)
+            {
+                list.Push(i);
+                list.Unshift(i - 3);
+            }
+
+            list.Sort();
+        } */
 
     }
 }

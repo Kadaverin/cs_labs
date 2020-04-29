@@ -6,65 +6,61 @@ namespace StudentsList
 {
     class DoubleLinkedListMergeSort <T> where T : IComparable<T>
     {
-        public static Node<T> MergeSort(ref Node<T> node, Func<T, T, bool> isFirstBefore)
+        public static DoubleLinkedList<T>.Node MergeSort(DoubleLinkedList<T>.Node head, Func<T, T, bool> isFirstBefore)
         {
-            if (node is null || node.Next is null)
+            int listSize = 1, numMerges;
+            if (ReferenceEquals(head?.Next, null)) return head;
+
+            do
             {
-                return node;
-            }
-            Node<T> second = SplitList(node);
+                numMerges = 0;
+                var left = head;
+                var tail = head = null;
 
-            // Recur for left and right halves 
-            node = MergeSort(ref node, isFirstBefore);
-            second = MergeSort(ref second, isFirstBefore);
+                while (!ReferenceEquals(left, null))
+                {
+                    numMerges++;
+                    var right = left;
+                    var leftSize = 0;
+                    var rightSize = listSize;
 
-            // Merge the two sorted halves 
-            return MergeLists(node, second, isFirstBefore);
-        }
+                    while (!ReferenceEquals(right, null) && leftSize < listSize)
+                    {
+                        leftSize++;
+                        right = right.Next;
+                    }
 
-        private static Node<T> MergeLists(Node<T> first, Node<T> second, Func<T, T, bool> isFirstBefore)
-        {
-            // If first linked list is empty 
-            if (first is null)
-            {
-                return second;
-            }
+                    while (leftSize > 0 || rightSize > 0 && !ReferenceEquals(right, null))
+                    {
+                        DoubleLinkedList<T>.Node next;
+                        if (rightSize == 0 || ReferenceEquals(right, null) || left.Value.CompareTo(right.Value) < 0)
+                        {
+                            next = left;
+                            left = left.Next;
+                            leftSize--;
+                        }
+                        else
+                        {
+                            next = right;
+                            right = right.Next;
+                            rightSize--;
+                        }
 
-            // If second linked list is empty 
-            if (second is null)
-            {
-                return first;
-            }
+                        if (!ReferenceEquals(tail, null)) tail.Next = next;
+                        else head = next;
 
-            // Pick the smaller value 
-            if (isFirstBefore(first.Value, second.Value))
-            {
-                first.Next = MergeLists(first.Next, second, isFirstBefore);
-                first.Next.Prev = first;
-                first.Prev = null;
-                return first;
-            }
-            else
-            {
-                second.Next = MergeLists(first, second.Next, isFirstBefore);
-                second.Next.Prev = second;
-                second.Prev = null;
-                return second;
-            }
-        }
+                        next.Prev = tail;
+                        tail = next;
+                    }
 
+                    left = right;
+                }
 
-        private static Node<T> SplitList(Node<T> head)
-        {
-            Node<T> fast = head, slow = head;
-            while (fast.Next is object && fast.Next.Next is object)
-            {
-                fast = fast.Next.Next;
-                slow = slow.Next;
-            }
-            Node<T> temp = slow.Next;
-            slow.Next = null;
-            return temp;
+                tail.Next = null;
+                listSize <<= 1;
+            } while (numMerges > 1);
+
+            return head;
         }
     }
 }
