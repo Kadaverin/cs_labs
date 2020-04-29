@@ -27,18 +27,28 @@ namespace StudentsList
             return FromList(this);
         }
 
-
-
         public int CompareTo(NamedDoubleLinkedList<T> other)
         {
-            if (ReferenceEquals(this, other)) return 0;
             if (ReferenceEquals(null, other)) return 1;
-            return string.CompareOrdinal(Name, other.Name);
+
+            return ReferenceEquals(this, other) ? 0 : string.CompareOrdinal(Name, other.Name);
         }
 
         public static int Compare(NamedDoubleLinkedList<T> list1, NamedDoubleLinkedList<T> list2)
         {
             return string.CompareOrdinal(list1?.Name, list2?.Name);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is NamedDoubleLinkedList<T> list &&
+                   base.Equals(obj) &&
+                   Name == list.Name;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(base.GetHashCode(), Name);
         }
 
         public static bool operator == (NamedDoubleLinkedList<T> list1, NamedDoubleLinkedList<T> list2)
