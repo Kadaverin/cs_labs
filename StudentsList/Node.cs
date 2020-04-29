@@ -10,6 +10,18 @@ namespace StudentsList
         public Node<T> Prev { get; set; }
         public Node<T> Next { get; set; }
 
+        public Node(T data, Node<T> prev, Node<T> next)
+        {
+            Value = data;
+            Prev = prev;
+            Next = next;
+        }
+
+        public Node(T data)
+        {
+            Value = data;
+        }
+
         public int CompareTo(Node<T> obj)
         {
             return CompareNodes(this, obj);
@@ -53,7 +65,7 @@ namespace StudentsList
 
         public object Clone()
         {
-            return Value is ICloneable ? ((ICloneable)Value).Clone() : Value;
+            return Utils.Clone(Value);
         }
 
         public override int GetHashCode()

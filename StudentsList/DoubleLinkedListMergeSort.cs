@@ -6,7 +6,7 @@ namespace StudentsList
 {
     class DoubleLinkedListMergeSort <T> where T : IComparable<T>
     {
-        public static Node<T> MergeSort(ref Node<T> node, Func<T, T, bool> isSmaller)
+        public static Node<T> MergeSort(ref Node<T> node, Func<T, T, bool> isFirstBefore)
         {
             if (node is null || node.Next is null)
             {
@@ -15,14 +15,14 @@ namespace StudentsList
             Node<T> second = SplitList(node);
 
             // Recur for left and right halves 
-            node = MergeSort(ref node, isSmaller);
-            second = MergeSort(ref second, isSmaller);
+            node = MergeSort(ref node, isFirstBefore);
+            second = MergeSort(ref second, isFirstBefore);
 
             // Merge the two sorted halves 
-            return MergeLists(node, second, isSmaller);
+            return MergeLists(node, second, isFirstBefore);
         }
 
-        private static Node<T> MergeLists(Node<T> first, Node<T> second, Func<T, T, bool> isSmaller)
+        private static Node<T> MergeLists(Node<T> first, Node<T> second, Func<T, T, bool> isFirstBefore)
         {
             // If first linked list is empty 
             if (first is null)
@@ -37,16 +37,16 @@ namespace StudentsList
             }
 
             // Pick the smaller value 
-            if (isSmaller(first.Value, second.Value))
+            if (isFirstBefore(first.Value, second.Value))
             {
-                first.Next = MergeLists(first.Next, second, isSmaller);
+                first.Next = MergeLists(first.Next, second, isFirstBefore);
                 first.Next.Prev = first;
                 first.Prev = null;
                 return first;
             }
             else
             {
-                second.Next = MergeLists(first, second.Next, isSmaller);
+                second.Next = MergeLists(first, second.Next, isFirstBefore);
                 second.Next.Prev = second;
                 second.Prev = null;
                 return second;
